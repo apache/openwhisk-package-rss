@@ -1,0 +1,16 @@
+---
+declared-services:
+  ow_triggers:
+    label: cloudantNoSQLDB
+    plan: Shared 
+
+applications:
+- path: .
+  memory: 256M
+  instances: 1
+  domain: mybluemix.net
+  name: rsseventprovider
+  host: rsseventprovider
+  disk_quota: 1024M
+  services:
+  - ow_triggers

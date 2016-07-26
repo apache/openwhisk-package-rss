@@ -1,0 +1,26 @@
+{
+  "name": "rss-event-provider",
+  "version": "1.0.0",
+  "description": "A service to parse RSS Sources and create events for each new feed",
+  "main": "app.js",
+  "license" : "Apache-2.0",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.5",
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "http-status": "^0.2.0",
+    "request": "^2.69.0",
+    "feedparser": "^1.1.4", 
+    "ms":"^0.7.1",
+    "cloudant": "^1.4.1",
+    "cfenv": "1.0.x",
+    "winston":"^2.2.0"
+  },
+  "engines": {
+    "node": "6.2.2",
+    "npm": "3.10.3"
+  }
+}
