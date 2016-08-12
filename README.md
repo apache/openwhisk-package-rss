@@ -89,9 +89,11 @@ where:
 
 Local installation:
 --------------------
-Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.
-Install the package using `./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
-To uninstall the package, use `./uninstall.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI` 
+Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.    
+
+`./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
+
+`./uninstall.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI` 
 
 where :
 - **$EDGE_HOST** is where openwhisk is deployed
