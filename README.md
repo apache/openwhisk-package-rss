@@ -42,22 +42,40 @@ e.g.
 
 Accepted polling interval formats: 2 days, 1d, 10h, 2.5hrs, 2h, 1m, 5s 
 
+Install wsk CLI
+================
+Follow the instructions at https://new-console.ng.bluemix.net/openwhisk/cli
 
-##Install/Uninstall RSS package
-This package can be installed locally(local openwhisk instance or a vendors OpenWhisk offering such as Bluemix OpenWhisk)
+Initializing database:
+=====================
+Create a CouchDB/Cloudant instance called ow_triggers and the following database:
+- registered_triggers
 
-Local installation:
---------------------
-Install the package using `./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
-where :
-- **$EDGE_HOST** is where openwhisk is deployed
-- **$AUTH_KEY** is the OpenWhisk Authentication key(Run `wsk property get` to obtain it).
-- **$WSK_CLI** is the path of OpenWhisk command interface binary
-- **$PROVIDER_ENDPOINT** is the endpoint of the event provider service, i.e. http://host:port/rss
+This database will hold all of the registered triggers with the RSS sources. A potential database service that could be used is the Bluemix Cloudant service. 
 
-This will create a new package called **rss** as well as feed action within the package.
+RSS Service(Event Provider)
+============================
+In order to support the openwhisk package, there needs to be an event generating service that fires a trigger in the openwhisk environment. This service polls an RSS/ATOM source and applies logic to determine whether a feed item should be delivered to the openwhisk rss package. It internally uses  a CouchDB database to persist the triggers' information. You will need to initialized the DB prior to using this service. The event provider service keeps a registry of triggers. When a trigger is initially created, the service fires events for RSS feed items which are published within pollingInterval from now.
 
-To uninstall the package, use `./uninstall.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI` 
+There are two options to deploy the service:  
+
+Bluemix Deployment: 
+-------------------
+This service can be hosted as a cf app on CloudFoundry. To deploy on IBM Bluemix:
+
+1. Change the name and host fields in the manifest.yml to be unique. Bluemix requires routes to be globally unique. 
+2. Run `cf push`
+
+Local Deployment:
+------------------
+This service can be ran as a node app on your local machine. To run it use the following command:
+
+`node app.js CLOUDANT_USERNAME CLOUDANT_PASSWORD OPENWHISK_AUTH_KEY`
+
+Note: Local deployment of this service requires extra configuration if it's to be run with the Bluemix OpenWhisk. 
+
+RSS Package Installation
+=========================
 
 Bluemix Installation 
 ----------------------
@@ -65,17 +83,23 @@ Bluemix Installation
 
 `./uninstall.sh openwhisk.ng.bluemix.net $AUTH_KEY wsk`
 
-Note: this assumes the wsk CLI is already installed(https://new-console.ng.bluemix.net/openwhisk/cli). 
+where:
+- **$PROVIDER_ENDPOINT** is the endpoint of the event provider service. It's a fully qualified url including the path to the resource. i.e. http://host:port/rss
+- **$AUTH_KEY** is the OpenWhisk Authentication key(Run `wsk property get` to obtain it).
 
-##Testing
-Executing test case locally:    
+Local installation:
+--------------------
+Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.
+Install the package using `./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
+To uninstall the package, use `./uninstall.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI` 
 
-   1. Copy your test files into `openwhisk/tests/src/packages`   
-   2. `vagrant ssh` to your local vagrant environment      
-   3. Navigate to the openwhisk directory   
-   4. Run this command - `gradle :tests:test --tests "packages.CLASS_NAME`   
+where :
+- **$EDGE_HOST** is where openwhisk is deployed
+- **$AUTH_KEY** is the OpenWhisk Authentication key(Run `wsk property get` to obtain it).
+- **$WSK_CLI** is the path of OpenWhisk command interface binary
+- **$PROVIDER_ENDPOINT** is the endpoint of the event provider service. It's a fully qualified url including the path to the resource. i.e. http://host:port/rss
 
-To execute all tests, run `gradle :tests:test` 
+This will create a new package called **rss** as well as feed action within the package.
 
 ##Package contents
 | Entity | Type | Parameters | Description |
@@ -92,28 +116,15 @@ To execute all tests, run `gradle :tests:test`
 
 Note: If the filter parameter enables logic that only searches for matches in the feed items' titles and descriptions. If 60% or more of the keywords are found in the RSS feed item, an event will be fired for the feed item. For example, given that filter "Washington D.C.,capital,politics", an event will be fired only if 2 of the 3 keywords are present in the feed item. 
 
+##Testing
+Executing test case locally:    
 
-RSS Service(Event Provider)
-============================
-In order to support the openwhisk package, there needs to be an event generating service that fires a trigger in the openwhisk environment. This service polls an RSS/ATOM source and applies logic to determine whether a feed item should be delivered to the openwhisk rss package. It uses internally a CouchDB database to persist the triggers information. You will need to initialized the DB prior to using this service. The event provider service keeps a registry of triggers. When a trigger is initially created, the service fires events for RSS feed items which are published within pollingInterval from now.
+   1. Copy your test files into `openwhisk/tests/src/packages`   
+   2. `vagrant ssh` to your local vagrant environment      
+   3. Navigate to the openwhisk directory   
+   4. Run this command - `gradle :tests:test --tests "packages.CLASS_NAME`   
 
-Local Deployment:
-------------------
-This service can be ran as a node app on your local machine. To run it use the following command:
-
-`node app.js CLOUDANT_USERNAME CLOUDANT_PASSWORD OPENWHISK_AUTH_KEY`
-
-Bluemix Deployment: 
--------------------
-This service can be hosted as a cf app on CloudFoundry. To deploy on IBM Bluemix:
-
-1. change the name and host fields in the manifest.yml
-2. Run `cf push`
-
-Initializing database:
-------------------------------
-Create a CouchDB/Cloudant instance called ow_triggers and the following database:
-- registered_triggers
+To execute all tests, run `gradle :tests:test` 
 
 ## Contributing
 Please refer to [CONTRIBUTING.md](CONTRIBUTING.md)
