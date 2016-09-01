@@ -1,12 +1,9 @@
 #Openwhisk RSS Package
-==========================
-This package allows users to subscribe to RSS/ATOM feeds and receive events when a new feed item is available. It creates one event/activation per feed item that meets the criteria. 
+
+This package allows users to subscribe to RSS/ATOM feeds and receive events when a new feed item is available. It creates one event/activation per feed item that meets the criteria. Below is the hierarchy of the RSS Package.
 
 ```
-
 openwhisk-package-rss/
-├── actions
-│   └── app.js
 ├── CONTRIBUTING.md
 |-- images 
 ├── feeds
@@ -32,53 +29,26 @@ openwhisk-package-rss/
 
 ![Architecture](images/rssarchitecture.png?raw=true "High Level Architecture")
 
-##Usage
-To use this trigger feed, you need to pass the required parameters (refer to the table below)
+##Package contents
+| Entity | Type | Parameters | Description |
+| --- | --- | --- | --- |
+| `/namespace/rss` | package | - | Openwhisk Package Template |
+| `/namespace/rss/rss_feed.js` | feed | [details](#feeds) | Feed to provide events when a new rss item is available |
 
-`wsk trigger create rss_trigger --feed /namespace/package/feed_name -p url 'url_to_rss' -p pollingInterval 'timePeriod'`
+###Feeds parameters
+| **Parameter** | **Type** | **Required** | **Description**| **Options** | **Default** | **Example** |
+| ------------- | ---- | -------- | ------------ | ------- | ------- |------- |
+| url | *string* | yes |  Url to RSS feed | - | - | "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" |
+| pollingInterval | *string* | yes |  Interval at which polling is performed | - | - | "2h" |
+| filter | *string* | no |  Comma separted list of keywords to filter on| - | - | "Washington D.C.,capital" |
 
-e.g.   
-`wsk trigger create rss_trigger --feed /guest/rss/rss_feed -p url 'http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' -p pollingInterval '2h'`
+Note: If the filter parameter enables logic that only searches for matches in the feed items' titles and descriptions. If 60% or more of the keywords are found in the RSS feed item, an event will be fired for the feed item. For example, given that filter "Washington D.C.,capital,politics", an event will be fired only if 2 of the 3 keywords are present in the feed item.
 
-Accepted polling interval formats: 2 days, 1d, 10h, 2.5hrs, 2h, 1m, 5s 
+##RSS Package Installation
 
-Install wsk CLI
-================
-Follow the instructions at https://new-console.ng.bluemix.net/openwhisk/cli
+###Bluemix Installation
+First you need to install wsk CLI, follow the instructions at https://new-console.ng.bluemix.net/openwhisk/cli
 
-Initializing database:
-=====================
-Create a CouchDB/Cloudant instance called ow_triggers and the following database:
-- registered_triggers
-
-This database will hold all of the registered triggers with the RSS sources. A potential database service that could be used is the Bluemix Cloudant service. 
-
-RSS Service(Event Provider)
-============================
-In order to support the openwhisk package, there needs to be an event generating service that fires a trigger in the openwhisk environment. This service polls an RSS/ATOM source and applies logic to determine whether a feed item should be delivered to the openwhisk rss package. It internally uses  a CouchDB database to persist the triggers' information. You will need to initialized the DB prior to using this service. The event provider service keeps a registry of triggers. When a trigger is initially created, the service fires events for RSS feed items which are published within pollingInterval from now.
-
-There are two options to deploy the service:  
-
-Bluemix Deployment: 
--------------------
-This service can be hosted as a cf app on CloudFoundry. To deploy on IBM Bluemix:
-
-1. Change the name and host fields in the manifest.yml to be unique. Bluemix requires routes to be globally unique. 
-2. Run `cf push`
-
-Local Deployment:
-------------------
-This service can be ran as a node app on your local machine. To run it use the following command:
-
-`node app.js CLOUDANT_USERNAME CLOUDANT_PASSWORD OPENWHISK_AUTH_KEY`
-
-Note: Local deployment of this service requires extra configuration if it's to be run with the Bluemix OpenWhisk. 
-
-RSS Package Installation
-=========================
-
-Bluemix Installation 
-----------------------
 `./install.sh openwhisk.ng.bluemix.net $AUTH_KEY wsk $PROVIDER_ENDPOINT`
 
 `./uninstall.sh openwhisk.ng.bluemix.net $AUTH_KEY wsk`
@@ -87,8 +57,7 @@ where:
 - **$PROVIDER_ENDPOINT** is the endpoint of the event provider service. It's a fully qualified url including the path to the resource. i.e. http://host:port/rss
 - **$AUTH_KEY** is the OpenWhisk Authentication key(Run `wsk property get` to obtain it).
 
-Local installation:
---------------------
+###Local installation:
 Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.    
 
 `./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
@@ -103,23 +72,43 @@ where :
 
 This will create a new package called **rss** as well as feed action within the package.
 
-##Package contents
-| Entity | Type | Parameters | Description |
-| --- | --- | --- | --- |
-| `/namespace/rss` | package | - | Openwhisk Package Template |
-| `/namespace/rss/rss_feed.js` | feed | [details](#feeds) | Feed to provide events when a new rss item is available |
 
-###Feeds
-| **Parameter** | **Type** | **Required** | **Description**| **Options** | **Default** | **Example** |
-| ------------- | ---- | -------- | ------------ | ------- | ------- |------- |
-| url | *string* | yes |  Url to RSS feed | - | - | "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" |
-| pollingInterval | *string* | yes |  Interval at which polling is performed | - | - | "2h" |
-| filter | *string* | no |  Comma separted list of keywords to filter on| - | - | "Washington D.C.,capital" |
+##RSS Service(Event Provider) Deployment
 
-Note: If the filter parameter enables logic that only searches for matches in the feed items' titles and descriptions. If 60% or more of the keywords are found in the RSS feed item, an event will be fired for the feed item. For example, given that filter "Washington D.C.,capital,politics", an event will be fired only if 2 of the 3 keywords are present in the feed item. 
+In order to support the openwhisk package, there needs to be an event generating service that fires a trigger in the openwhisk environment. This service polls an RSS/ATOM source and applies logic to determine whether a feed item should be delivered to the openwhisk rss package. It internally uses  Cloudant/CouchDB database to persist the triggers' information. You will need to initialized the DB prior to using this service. The event provider service keeps a registry of triggers. When a trigger is initially created, the service fires events for RSS feed items which are published within pollingInterval from now.
 
-##Testing
-Executing test case locally:    
+There are two options to deploy the service:
+
+###Bluemix Deployment:
+This service can be hosted as a cf app on CloudFoundry. To deploy on IBM Bluemix:
+
+1. Create a Cloudant service on bluemix, and create a database with name 'registered_triggers'
+1. Change the name and host fields in the manifest.yml to be unique. Bluemix requires routes to be globally unique.
+2. Run `cf push`
+
+###Local Deployment:
+This service can be ran as a node app on your local machine.
+
+1. Install a local CouchDB, for how to install a CouchDB locally, please follow instruction at https://developer.ibm.com/open/2016/05/23/setup-openwhisk-use-local-couchdb/
+
+2. Create a database with name 'registered_triggers' in the CouchDB.
+
+3. Run the following command, `node app.js CLOUDANT_USERNAME CLOUDANT_PASSWORD OPENWHISK_AUTH_KEY`
+
+Note: Local deployment of this service requires extra configuration if it's to be run with the Bluemix OpenWhisk.
+
+##Usage of RSS package.
+To use this trigger feed, you need to pass the required parameters (refer to the table below)
+
+`wsk trigger create rss_trigger --feed /namespace/package/feed_name -p url 'url_to_rss' -p pollingInterval 'timePeriod'`
+
+e.g.
+`wsk trigger create rss_trigger --feed /guest/rss/rss_feed -p url 'http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml' -p pollingInterval '2h'`
+
+Accepted polling interval formats: 2 days, 1d, 10h, 2.5hrs, 2h, 1m, 5s
+
+##How to do tests
+The integration test could only be performed with a local openwhisk deployment:
 
    1. Copy your test files into `openwhisk/tests/src/packages`   
    2. `vagrant ssh` to your local vagrant environment      
@@ -128,7 +117,7 @@ Executing test case locally:
 
 To execute all tests, run `gradle :tests:test` 
 
-## Contributing
+## How to contributing
 Please refer to [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
