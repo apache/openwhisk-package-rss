@@ -32,30 +32,37 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 var whiskhost;
 var triggers = {}
-var credentials = {}
-var apiKey;
+var credentials = {} //The username and password used for the database connection, for example: cloudant(if bluemix) or couchdb(if local)
 
-if(process.env.VCAP_SERVICES) {
+var db;//database to persist the triggers
+var dbname='registered_triggers'
+
+var apiKey;//the api key used for the openwhisk whisk platform
+
+if(process.env.VCAP_SERVICES) {//run on bluemix platform
     credentials = appEnv.getServiceCreds("ow_triggers");
     whiskhost = "openwhisk.ng.bluemix.net"
-} else if(process.argv[2]!=null && process.argv[3]!=null && process.argv[4]!=null){
+    var cloudant = Cloudant({account: credentials.username, password: credentials.password}, function(err, cloudant) {
+        if (err) {
+            return logger.error('Failed to initialize Cloudant: ' + err.message);
+        }
+    });
+
+    db = cloudant.db.use(dbname);
+} else if(process.argv[2]!=null && process.argv[3]!=null && process.argv[4]!=null){//run locally
     credentials.username = process.argv[2]
     credentials.password = process.argv[3]
     apiKey = process.argv[4].split(':');
+    var nano = require('nano')('http://' + credentials.username + ':' + credentials.password + '@' + 'localhost:5984');
+    nano.db.create(dbname)
+    db = nano.db.use(dbname)
+
 }
 
-if(!credentials || !credentials.username || !credentials.password) {
+if((!credentials) && (!credentials.username || !credentials.password)) {
     logger.error('No credentials provided')
     process.exit(1)
 }
-
-var cloudant = Cloudant({account: credentials.username, password: credentials.password}, function(err, cloudant) {
-    if (err) {
-        return logger.error('Failed to initialize Cloudant: ' + err.message);
-    }
-});
-
-var db = cloudant.db.use("registered_triggers");
 
 //POST
 app.post('/rss',authorize, function(req, res) {
@@ -359,16 +366,23 @@ function authorize(req, res, next) {
 function resetSystem() {
     var method = 'resetSystem';
     logger.info(method, 'resetting system from last state');
-    db.list({include_docs: true}, function(err, body) {
-        if(!err) {
-            body.rows.forEach(function(trigger) {
-                createTrigger(trigger.doc);
-            });
-        }
-        else {
-            logger.error(method, 'could not get latest state from database');
-        }
-    });
+    try {
+        db.list({include_docs: true}, function (err, body) {
+            if (!err) {
+                body.rows.forEach(function (trigger) {
+                    createTrigger(trigger.doc);
+                });
+            }
+            else {
+                logger.error(method, 'could not get latest state from database');
+                process.exit(1)
+            }
+        });
+    }
+    catch(e){
+        logger.info(method, 'could not reset the system, please check your db settings')
+        process.exit(1)
+    }
 }
 
 app.listen(appEnv.port || 6003, function () {
