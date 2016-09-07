@@ -107,6 +107,10 @@ e.g.
 
 Accepted polling interval formats: 2 days, 1d, 10h, 2.5hrs, 2h, 1m, 5s
 
+To use trigger feed to delete created trigger.
+
+`wsk trigger delete rss_trigger`
+
 ##How to do tests
 The integration test could only be performed with a local openwhisk deployment:
 

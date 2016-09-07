@@ -23,9 +23,6 @@ function main(msg){
     var lifecycleEvent = msg.lifecycleEvent || 'CREATE';
 
     if (lifecycleEvent === 'CREATE'){
-        if(typeof msg.trigger_payload === 'string'){
-            msg.trigger_payload = {payload: msg.trigger_payload};
-        }
 
         var newTrigger = {
             name: trigger.name,
@@ -62,7 +59,7 @@ function main(msg){
         });
     }
 
-    if (lifecycleEvent === 'DELETE'){
+    else if (lifecycleEvent === 'DELETE'){
 
         var trigger = {
             name: trigger.name,
