@@ -190,11 +190,11 @@ function checkFeedSourceUpdated(triggerIdentifier, callback)
                     includeItem = areKeywordsFoundInItems(keywordsArray,item, 0.6);//Hardcoded threshold. Maybe externalize later
                      
                     if(includeItem) {
-                      fireTrigger(newTrigger.namespace,newTrigger.name,itemContentMap, newTrigger.apiKey)
+                      fireTrigger(newTrigger.namespace,newTrigger.name, newTrigger.whiskhost, itemContentMap, newTrigger.apiKey)
                     }
                 }
                 else {
-                    fireTrigger(newTrigger.namespace,newTrigger.name,itemContentMap, newTrigger.apiKey)
+                    fireTrigger(newTrigger.namespace,newTrigger.name, newTrigger.whiskhost, itemContentMap, newTrigger.apiKey)
                 }
             }
         }
@@ -206,7 +206,7 @@ function checkFeedSourceUpdated(triggerIdentifier, callback)
     });
 }
 
-function fireTrigger(namespace, name, payload, apiKey) {;
+function fireTrigger(namespace, name, whiskhost, payload, apiKey) {;
     var baseUrl = "https://" + whiskhost + "/api/v1/namespaces";
     var keyParts = apiKey.split(':');
 
@@ -326,6 +326,7 @@ function createTrigger(params) {
         namespace:params.namespace,
         pollingInterval: params.pollingInterval,
         filter: params.filter,
+        whiskhost:params.whiskhost,
         timeLastChecked:timeLastChecked
     };
 

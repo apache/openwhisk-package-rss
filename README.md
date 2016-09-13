@@ -111,6 +111,41 @@ To use trigger feed to delete created trigger.
 
 `wsk trigger delete rss_trigger`
 
+##Associate rss trigger and action by using rule
+ 1. Create a new trigger, for example:
+ `wsk trigger create rss_trigger --feed /guest/rss/rss_feed -p url 'http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml'  -p pollingInterval  '2h'   -p whiskhost  whiskhostip`
+
+ 2. Create a 'hello.js' file that reacts to the trigger events with action code below:
+ ```
+ function main(params) {
+   var title = params.title || 'world';
+   var des = params.description || 'default_description';
+  return {payload: 'hello,' + title + '!'+ 'description' + des};
+
+ }
+ ```
+ Make sure the action exists:
+ `wsk action update hello hello.js`
+
+ 3. Create the rule that associate the trigger and the action:
+ `wsk rule create rss_rule rss_trigger hello`
+
+ 4. So once there are any rss updates that trigger events, you can verify the action was invoked by checking the most recent activations:
+
+ `wsk activation list --limit 1  hello`
+
+ ```
+ activations
+ f9d41bd2589943efa4f36c5cf1f55b44             hello
+ ```
+
+ `wsk activation result f9d41bd2589943efa4f36c5cf1f55b44`
+
+ ```
+ {
+     "payload": "hello,Lorem ipsum 2016-09-13T03:05:57+00:00!descriptionUllamco esse officia cillum exercitation ullamco aute aute quis adipisicing officia."
+ }
+ ```
 ##How to do tests
 The integration test could only be performed with a local openwhisk deployment:
 
