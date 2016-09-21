@@ -107,13 +107,15 @@ e.g.
 
 Accepted polling interval formats: 2 days, 1d, 10h, 2.5hrs, 2h, 1m, 5s
 
+For testing purpose, you could use https://github.com/mbertolacci/lorem-rss as the rss feed source.
+
 To use trigger feed to delete created trigger.
 
 `wsk trigger delete rss_trigger`
 
 ##Associate rss trigger and action by using rule
  1. Create a new trigger, for example:
- `wsk trigger create rss_trigger --feed /guest/rss/rss_feed -p url 'http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml'  -p pollingInterval  '2h'   -p whiskhost  whiskhostip`
+ `wsk trigger create rss_trigger --feed /guest/rss/rss_feed -p url 'http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml'  -p pollingInterval  '2h'   -p whiskHost  whiskhostip`
 
  2. Create a 'hello.js' file that reacts to the trigger events with action code below:
  ```
