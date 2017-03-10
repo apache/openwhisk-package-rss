@@ -24,7 +24,7 @@ var Promise = require('bluebird');
 var ms = require('ms');
 var FeedParser = require('feedparser');
 var feedparser = new FeedParser();
-var app = express(); 
+var app = express();
 var cfenv = require('cfenv');
 var appEnv = cfenv.getAppEnv();
 app.use(bodyParser.json());
@@ -69,18 +69,18 @@ app.post('/rss',authorize, function(req, res) {
     var method  = "POST /rss";
     var newRequest = req.body;
 
-    // early exits 
+    // early exits
     if(!newRequest.namespace) return sendError(method, 400, 'No namespace', res)
     if(!newRequest.name) return sendError(method, 400, 'No name', res)
     if(!newRequest.url) return sendError(method, 400, 'No url', res)
     if(!newRequest.pollingInterval) return sendError(method, 400, 'No pollingInterval', res)
-   
+
     if(appEnv.isLocal) {
-        newRequest.apiKey = apiKey[0] + ":" + apiKey[1]  
-        whiskhost = newRequest.whiskhost; 
+        newRequest.apiKey = apiKey[0] + ":" + apiKey[1]
+        whiskhost = newRequest.whiskhost;
     }
     else {
-        newRequest.apiKey = req.user.uuid + ":" + req.user.key; 
+        newRequest.apiKey = req.user.uuid + ":" + req.user.key;
     }
 
     var triggerIdentifier = getTriggerIdentifier(newRequest.apiKey, newRequest.namespace, newRequest.name);
@@ -133,7 +133,7 @@ app.delete('/rss',authorize, function(req, res) {
 function checkFeedSourceUpdated(triggerIdentifier, callback)
 {
     var newTrigger = triggers[triggerIdentifier];
-    logger.info("Start of CheckFeedSourceUpdated for " + newTrigger.namespace + "/" + newTrigger.name) 
+    logger.info("Start of CheckFeedSourceUpdated for " + newTrigger.namespace + "/" + newTrigger.name)
     var timeLastChecked = newTrigger.timeLastChecked;
     var filter = newTrigger.filter;
     var keywordsArray;
@@ -145,7 +145,7 @@ function checkFeedSourceUpdated(triggerIdentifier, callback)
 
     var req = request(newTrigger.url)
         , feedparser = new FeedParser();
-    
+
     req.on('error', function (error) {
         var err = new Error(error.message)
         callback(err, null);
@@ -170,7 +170,7 @@ function checkFeedSourceUpdated(triggerIdentifier, callback)
 
     feedparser.on('readable', function() {
         var stream = this
-          , meta = this.meta 
+          , meta = this.meta
           , item;
 
         var itemDate;
@@ -185,10 +185,10 @@ function checkFeedSourceUpdated(triggerIdentifier, callback)
             if(itemTime > timeLastChecked)
             {
                 itemContentMap= createItemContentMap(item);
-                
-                if(keywordsArray) {   //If filter is present, search for keywords 
+
+                if(keywordsArray) {   //If filter is present, search for keywords
                     includeItem = areKeywordsFoundInItems(keywordsArray,item, 0.6);//Hardcoded threshold. Maybe externalize later
-                     
+
                     if(includeItem) {
                       fireTrigger(newTrigger.namespace,newTrigger.name, newTrigger.whiskhost, itemContentMap, newTrigger.apiKey)
                     }
@@ -317,7 +317,7 @@ function createTrigger(params) {
         logger.info("Polling....");
         checkFeedSourceUpdated(triggerIdentifier,function(err,data){});
     }, params.pollingInterval);
-    
+
     var trigger = {
         cronHandle: cronHandle,
         apiKey: params.apiKey,
@@ -345,7 +345,7 @@ function sendError(method, statusCode, message, res) {
 }
 
 function authorize(req, res, next) {
-    var method = req.method;   
+    var method = req.method;
 
     if(!req.headers.authorization) return sendError(method, 400, 'Malformed request, authentication header expected', res);
 

@@ -32,7 +32,7 @@ function main(msg){
             filter:msg.filter,
             whiskhost: msg.apiHost
         };
-        
+
         request({
             method: "POST",
             uri: msg.provider_endpoint,
