@@ -33,63 +33,82 @@ function main(msg){
             whiskhost: msg.apiHost
         };
 
-        request({
-            method: "POST",
-            uri: msg.provider_endpoint,
-            json: newTrigger,
-            auth: {
-                user: msg.authKey.split(':')[0],
-                pass: msg.authKey.split(':')[1]
-            }
-        }, function(err, res, body) {
-            console.log('rss: done http request');
-            if (!err && res.statusCode === 200) {
-                whisk.done();
-            }
-            else {
-                if(res) {
-                    console.log('rss: Error invoking whisk action:', res.statusCode, body);
-                    whisk.error(body.error);
+        var promise = new Promise(function (resolve, reject) {
+            request({
+                method: "POST",
+                uri: msg.provider_endpoint,
+                json: newTrigger,
+                auth: {
+                    user: msg.authKey.split(':')[0],
+                    pass: msg.authKey.split(':')[1]
+                }
+            }, function(err, res, body) {
+                console.log('rss: done http request');
+                if (!err && res.statusCode === 200) {
+                    resolve({
+                        response:res,
+                        body:body
+                        });
                 }
                 else {
-                    console.log('rss: Error invoking whisk action:', err);
-                    whisk.error();
+                    if(res) {
+                        console.log('rss: Error invoking whisk action:', res.statusCode, body);
+                        reject({
+                            statusCode:res.statusCode,
+                            response:res
+                        });
+                    }
+                    else {
+                        console.log('rss: Error invoking whisk action:', err);
+                        reject({
+                            error:err
+                        });
+                    }
                 }
-            }
+            });
         });
-    }
-
-    else if (lifecycleEvent === 'DELETE'){
+        return promise;
+    } else if (lifecycleEvent === 'DELETE'){
 
         var trigger = {
             name: trigger.name,
             namespace: trigger.namespace
         }
-
-        request({
-            method: "DELETE",
-            uri: msg.provider_endpoint,
-            json: trigger,
-            auth: {
-                user: msg.authKey.split(':')[0],
-                pass: msg.authKey.split(':')[1]
-            }
-        }, function(err, res, body) {
-            console.log('rss: done http request');
-            if (!err && (res.statusCode === 200 || res.statusCode === 404)) {
-                whisk.done();
-            }
-            else {
-                if(res) {
-                    console.log('rss: Error invoking whisk action:', res.statusCode, body);
-                    whisk.error(body.error);
+        var promise = new Promise(function ( resolve, reject){
+            request({
+                method: "DELETE",
+                uri: msg.provider_endpoint,
+                json: trigger,
+                auth: {
+                    user: msg.authKey.split(':')[0],
+                    pass: msg.authKey.split(':')[1]
+                }
+            }, function(err, res, body) {
+                console.log('rss: done http request');
+                if (!err && (res.statusCode === 200 || res.statusCode === 404)) {
+                    resolve({
+                       response:res,
+                        body:body
+                    });
                 }
                 else {
-                    console.log('rss: Error invoking whisk action:', err);
-                    whisk.error();
+                    if(res) {
+                        console.log('rss: Error invoking whisk action:', res.statusCode, body);
+                        reject({
+                           statusCode:res.statusCode,
+                            response:res
+                        });
+                    }
+                    else {
+                        console.log('rss: Error invoking whisk action:', err);
+                        reject({
+                             error:err
+                            });
+                    }
                 }
-            }
+            });
         });
+        return promise;
     }
 
     function parseQName(qname) {
@@ -106,6 +125,4 @@ function main(msg){
         }
         return parsed;
     }
-
-    return whisk.async();
 }
