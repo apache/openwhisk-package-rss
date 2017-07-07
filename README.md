@@ -1,11 +1,14 @@
 # Openwhisk RSS Package
 
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Build Status](https://travis-ci.org/apache/incubator-openwhisk-package-rss.svg?branch=master)](https://travis-ci.org/apache/incubator-openwhisk-package-rss)
+
 This package allows users to subscribe to RSS/ATOM feeds and receive events when a new feed item is available. It creates one event/activation per feed item that meets the criteria. Below is the hierarchy of the RSS Package.
 
 ```
 openwhisk-package-rss/
 ├── CONTRIBUTING.md
-|-- images 
+|-- images
 ├── feeds
 │      └── feed.js
 ├── install.sh
@@ -58,11 +61,11 @@ where:
 - **$AUTH_KEY** is the OpenWhisk Authentication key(Run `wsk property get` to obtain it).
 
 ### Local installation:
-Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.    
+Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.
 
 `./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
 
-`./uninstall.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI` 
+`./uninstall.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI`
 
 where :
 - **$EDGE_HOST** is where openwhisk is deployed
@@ -71,7 +74,6 @@ where :
 - **$PROVIDER_ENDPOINT** is the endpoint of the event provider service. It's a fully qualified url including the path to the resource. i.e. http://host:port/rss
 
 This will create a new package called **rss** as well as feed action within the package.
-
 
 ## RSS Service(Event Provider) Deployment
 
@@ -82,14 +84,15 @@ There are two options to deploy the service:
 ### Bluemix Deployment:
 This service can be hosted as a cf app on CloudFoundry. To deploy on IBM Bluemix:
 
-1. Create a Cloudant service on bluemix, and create a database with name 'registered_triggers'
+1. Create a Cloudant service on IBM Bluemix, and create a database with name 'registered_triggers'
 1. Change the name and host fields in the manifest.yml to be unique. Bluemix requires routes to be globally unique.
 2. Run `cf push`
 
 ### Local Deployment:
-This service can be ran as a node app on your local machine.
+This service can be run as a node app on your local machine.
 
-1. Install a local CouchDB, for how to install a CouchDB locally, please follow instruction at https://developer.ibm.com/open/2016/05/23/setup-openwhisk-use-local-couchdb/
+1. Install a local CouchDB. Detailed instructions can be found at:
+   - https://developer.ibm.com/open/2016/05/23/setup-openwhisk-use-local-couchdb/
 
 2. Create a database with name 'registered_triggers' in the CouchDB.
 
@@ -148,22 +151,18 @@ To use trigger feed to delete created trigger.
      "payload": "hello,Lorem ipsum 2016-09-13T03:05:57+00:00!descriptionUllamco esse officia cillum exercitation ullamco aute aute quis adipisicing officia."
  }
  ```
-## How to do tests
+## How to run tests?
 The integration test could only be performed with a local openwhisk deployment:
 
-   1. Copy your test files into `openwhisk/tests/src/packages`   
-   2. `vagrant ssh` to your local vagrant environment      
-   3. Navigate to the openwhisk directory   
+   1. Copy your test files into `openwhisk/tests/src/packages`
+   2. `vagrant ssh` to your local vagrant environment
+   3. Navigate to the openwhisk directory
    4. Run this command - `gradle :tests:test --tests "packages.CLASS_NAME" `
 
-To execute all tests, run `gradle :tests:test` 
+To execute all tests, run `gradle :tests:test`
 
-## How to contributing
+## How to contribute?
 Please refer to [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
-Copyright 2015-2016 IBM Corporation
-
-Licensed under the [Apache License, Version 2.0 (the "License")](http://www.apache.org/licenses/LICENSE-2.0.html).
-
-Unless required by applicable law or agreed to in writing, software distributed under the license is distributed on an "as is" basis, without warranties or conditions of any kind, either express or implied. See the license for the specific language governing permissions and limitations under the license.
+See [LICENSE.txt](https://github.com/apache/incubator-openwhisk-package-rss/blob/master/LICENSE.txt)
