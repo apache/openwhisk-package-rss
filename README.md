@@ -27,7 +27,6 @@ openwhisk-package-rss/
 └── uninstall.sh
 ```
 
-
 ## Architecture
 
 ![Architecture](images/rssarchitecture.png?raw=true "High Level Architecture")
@@ -61,7 +60,7 @@ where:
 - **$AUTH_KEY** is the OpenWhisk Authentication key(Run `wsk property get` to obtain it).
 
 ### Local installation:
-Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/openwhisk/openwhisk/blob/master/tools/vagrant/README.md.
+Local installation requires running the OpenWhisk environment locally prior to installing the package. To run OpenWhisk locally follow the instructions at https://github.com/apache/incubator-openwhisk/blob/master/tools/vagrant/README.md.
 
 `./install.sh  $EDGE_HOST $AUTH_KEY $WSK_CLI $PROVIDER_ENDPOINT`
 
