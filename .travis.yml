@@ -1,0 +1,31 @@
+# A Travis CI configuration file.
+sudo: required
+
+language: go
+
+go:
+  - 1.8
+
+services:
+  - docker
+
+git:
+  depth: 3
+
+before_install:
+  - ./tools/travis/cloneutils.sh
+
+install:
+  - export DEPLOY_BUILD_READY=false
+  - go get -u github.com/golang/lint/golint
+  - go get -u github.com/stretchr/testify
+
+script:
+  - echo $TRAVIS
+  - echo $TRAVIS_PULL_REQUEST
+  - echo $TRAVIS_SECURE_ENV_VARS
+  - printenv
+  - ./tools/travis/script.sh
+
+after_success:
+  - DEPLOY_BUILD_READY=true
