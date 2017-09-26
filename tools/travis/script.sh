@@ -32,5 +32,12 @@ $ANSIBLE_CMD openwhisk.yml -e '{"openwhisk_cli":{"installation_mode":"remote","r
 
 export OPENWHISK_HOME="$(dirname "$TRAVIS_BUILD_DIR")/openwhisk"
 
-cd $TRAVIS_BUILD_DIR
+WHISKPROPS_FILE="$OPENWHISK_HOME/whisk.properties"
 
+WSK_CLI=$OPENWHISK_HOME/bin/wsk
+AUTH_KEY=$(cat $OPENWHISK_HOME/ansible/files/auth.whisk.system)
+EDGE_HOST=$(grep '^edge.host=' $WHISKPROPS_FILE | cut -d'=' -f2)
+
+# Install the package
+cd $TRAVIS_BUILD_DIR
+source install.sh $EDGE_HOST $AUTH_KEY $WSK_CLI

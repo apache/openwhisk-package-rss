@@ -33,12 +33,12 @@ PROVIDER_ENDPOINT="$4"
 PACKAGE_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo Installing RSS Package \
 
-$WSK_CLI --apihost $APIHOST package update --auth $AUTH --shared yes -p apiHost $APIHOST -p provider_endpoint $PROVIDER_ENDPOINT rss \
+$WSK_CLI -i --apihost $APIHOST package update rss --auth $AUTH --shared yes \
     -a description "RSS Package" \
     -a parameters '[{"name":"provider_endpoint","required":true,"bindTime":true,"description":"RSS provider host"}]'
 
 
-$WSK_CLI --apihost $APIHOST action update --auth $AUTH --shared yes rss/rss_feed $PACKAGE_HOME/feeds/feed.js \
+$WSK_CLI -i --apihost $APIHOST action update rss/rss_feed $PACKAGE_HOME/feeds/feed.js --auth $AUTH \
     -a feed true \
 	-a description "A feed action to register for rss events meeting user specified criteria" \
 	-a parameters '[{"name":"url","required":true,"bindTime":true,"description":"Source URL"},{"name":"pollingInterval","required":true,"bindTime":true,"description":"RSS polling interval"},{"name":"filter","required":false,"bindTime":true,"description":"Comma separated list of keywords to watch for"}]' \
