@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Build script for Travis-CI.
 
 SCRIPTDIR=$(cd $(dirname "$0") && pwd)

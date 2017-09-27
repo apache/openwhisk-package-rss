@@ -15,28 +15,26 @@
  * limitations under the License.
  */
 
-package packages
+package rss
 
 import common._
 import org.junit.runner.RunWith
 import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
-import spray.json._
-import spray.json.DefaultJsonProtocol.StringJsonFormat
-import scala.collection.immutable.HashMap
-import org.scalatest.FlatSpecLike
+import common.TestHelpers
+import common.TestUtils._
+import common.Wsk
+import common.WskProps
+import common.WskTestHelpers
 
 @RunWith(classOf[JUnitRunner])
-class TemplateTests extends TestHelpers with WskTestHelpers with Matchers {
+class RSSTests extends TestHelpers with WskTestHelpers with Matchers {
 
   implicit val wskprops = WskProps()
   val wsk = new Wsk()
 
-  //val credentials = TestUtils.getVCAPcredentials("openwhisk-local")
-  //val apiKey = credentials.get("apiKey");
-
-  behavior of "Rss Package"
-
+    behavior of "Rss Package"
+    /*
     "trigger creation" should "return ok: created trigger feed" in {
     val triggerName = "trigger_rss_update"
     val feed = Some("/guest/rss/rss_feed")
@@ -47,11 +45,23 @@ class TemplateTests extends TestHelpers with WskTestHelpers with Matchers {
     res.toString should include("ok: created trigger feed")
     }
 
+
     "trigger deletion" should "return ok: deleted" in {
     val triggerName = "trigger_rss_update"
 
     var res = wsk.trigger.delete(triggerName);
     res.toString should include("ok: deleted ")
     }
-}
+    */
 
+    it should "not create a trigger when feed fails to initialize" in withAssetCleaner(wskprops) { (wp, assetHelper) =>
+        assetHelper.withCleaner(wsk.trigger, "badfeed", confirmDelete = false) { (trigger, name) =>
+          trigger.create(name, feed = Some(s"bogus"), expectedExitCode = ANY_ERROR_EXIT).exitCode should equal(NOT_FOUND)
+          trigger.get(name, expectedExitCode = NOT_FOUND)
+
+          trigger.create(name, feed = Some(s"bogus/feed"), expectedExitCode = ANY_ERROR_EXIT).exitCode should equal(
+            NOT_FOUND)
+          trigger.get(name, expectedExitCode = NOT_FOUND)
+        }
+      }
+}
