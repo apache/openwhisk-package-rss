@@ -41,3 +41,11 @@ EDGE_HOST=$(grep '^edge.host=' $WHISKPROPS_FILE | cut -d'=' -f2)
 # Install the package
 cd $TRAVIS_BUILD_DIR
 source install.sh $EDGE_HOST $AUTH_KEY $WSK_CLI
+
+mkdir $OPENWHISK_HOME/tests/src/test/scala/rss
+cp tests/src/* $OPENWHISK_HOME/tests/src/test/scala/rss/
+
+cd $OPENWHISK_HOME
+X="./gradlew :tests:test --tests rss.RSSTests "
+# for f in $(ls $OPENWHISK_HOME/tests/src/test/scala | sed -e 's/\..*$//'); do X="$X --tests \"rss.$f\""; done
+eval $X
